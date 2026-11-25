@@ -6,20 +6,26 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 
-# Modèle utilisateur
+# User model
 class User(AbstractUser):
-    pass
+    class Meta:
+        verbose_name = "User"
+        verbose_name_plural = "Users"
 
 
-# Modèle des spécialités
+# Specialty model
 class Specialty(models.Model):
     name = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name = "Specialty"
+        verbose_name_plural = "Specialties"
 
     def __str__(self):
         return self.name
 
 
-# Modèle médecin
+# Doctor model
 class Doctor(User):
     license_number = models.CharField(
         max_length=6,
@@ -42,11 +48,15 @@ class Doctor(User):
         related_name='doctors'
     )
 
+    class Meta:
+        verbose_name = "Doctor"
+        verbose_name_plural = "Doctors"
+
     def __str__(self):
         return f"Dr. {self.first_name} {self.last_name}"
 
 
-# Validation de la date de naissance
+# Birth date validation
 def validate_birth_date(value):
     if value >= timezone.localdate():
         raise ValidationError(
@@ -54,7 +64,7 @@ def validate_birth_date(value):
         )
 
 
-# Modèle patient
+# Patient model
 class Patient(User):
     national_id = models.CharField(
         max_length=8,
@@ -80,6 +90,10 @@ class Patient(User):
     birth_date = models.DateField(
         validators=[validate_birth_date]
     )
+
+    class Meta:
+        verbose_name = "Patient"
+        verbose_name_plural = "Patients"
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

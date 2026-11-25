@@ -8,13 +8,13 @@ from django.utils import timezone
 
 class Appointment(models.Model):
 
-    # Les différents états d'un rendez-vous
+    # Different appointment statuses
     class Status(models.TextChoices):
         PENDING = 'PENDING', 'En attente'
         CONFIRMED = 'CONFIRMED', 'Confirmé'
         CANCELLED = 'CANCELLED', 'Annulé'
 
-    # Informations du rendez-vous
+    # Appointment information
     appointment_date = models.DateTimeField()
 
     reason = models.TextField()
@@ -39,7 +39,7 @@ class Appointment(models.Model):
 
     updated_at = models.DateTimeField(auto_now=True)
 
-    # Relations avec Doctor et Patient
+    # Relations with Doctor and Patient
     doctor = models.ForeignKey(
         'AccountApp.Doctor',
         on_delete=models.CASCADE,
@@ -52,14 +52,14 @@ class Appointment(models.Model):
         related_name='appointments'
     )
 
-    # Validation de la date du rendez-vous
+    # Appointment date validation
     def clean(self):
         super().clean()
 
         if not self.appointment_date:
             return
 
-        # Récupérer l'ancienne date si le rendez-vous existe déjà
+        # Retrieve the old date if the appointment already exists
         if self.pk:
             old_date = type(self).objects.filter(
                 pk=self.pk
@@ -68,12 +68,11 @@ class Appointment(models.Model):
                 flat=True
             ).first()
 
-            # Autoriser la modification d'un ancien rendez-vous
-            # si sa date n'a pas été changée
+            # Allow modification if the date hasn't changed
             if old_date == self.appointment_date:
                 return
 
-        # Refuser une date passée ou égale à maintenant
+        # Reject past or current appointment dates
         if self.appointment_date <= timezone.now():
             raise ValidationError({
                 'appointment_date':
@@ -82,6 +81,9 @@ class Appointment(models.Model):
 
     class Meta:
         ordering = ['appointment_date']
+
+        verbose_name = "Appointment"
+        verbose_name_plural = "Appointments"
 
         constraints = [
             models.UniqueConstraint(
